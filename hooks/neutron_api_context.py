@@ -88,10 +88,11 @@ def get_tenant_network_types():
 
 def get_l3ha():
     if config('enable-l3ha'):
-        if CompareOpenStackReleases(os_release('neutron-server')) < 'juno':
+        release = os_release('neutron-server')
+        if CompareOpenStackReleases(release) < 'juno':
             log('Disabling L3 HA, enable-l3ha is not valid before Juno')
             return False
-        if get_l2population():
+        if CompareOpenStackReleases(release) < 'newton' and get_l2population():
             log('Disabling L3 HA, l2-population must be disabled with L3 HA')
             return False
         return True
@@ -110,7 +111,7 @@ def get_dvr():
                 log('Disabling DVR, enable-dvr requires the use of the vxlan '
                     'overlay network for OpenStack Juno')
                 return False
-        if get_l3ha():
+        if get_l3ha() and CompareOpenStackReleases(release) < 'newton':
             log('Disabling DVR, enable-l3ha must be disabled with dvr')
             return False
         if not get_l2population():
